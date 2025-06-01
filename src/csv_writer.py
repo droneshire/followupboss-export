@@ -1,6 +1,8 @@
 import csv
 import os
 
+from ryutils import log
+
 
 class CsvWriter:
     FIELDS = [
@@ -22,11 +24,12 @@ class CsvWriter:
         "Testing Box",
     ]
 
-    def __init__(self):
-        self.names = set()
+    def __init__(self, skip_duplicate_names: bool = True) -> None:
+        self.names: set[str] = set()
+        self.skip_duplicate_names = skip_duplicate_names
 
-    def write_people(self, people, output_path, append=False):
-        mode = "a" if append else "w"
+    def write_people(self, people: list[dict], output_path: str, append: bool = False) -> None:
+        mode: str = "a" if append else "w"
         with open(output_path, mode, newline="", encoding="utf-8") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.FIELDS)
             if not append:
@@ -36,7 +39,8 @@ class CsvWriter:
                 if not name:
                     continue
                 # Skip if we've already seen this name
-                if name in self.names:
+                if name in self.names and self.skip_duplicate_names:
+                    log.print_warn(f"Skipping duplicate name: {name}")
                     continue
                 self.names.add(name)
                 row = self._person_to_row(person)
@@ -44,13 +48,13 @@ class CsvWriter:
             csvfile.flush()
             os.fsync(csvfile.fileno())
 
-    def erase_file(self, output_path):
+    def erase_file(self, output_path: str) -> None:
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def _person_to_row(self, person):
+    def _person_to_row(self, person: dict) -> dict:
         # Helper to get first primary or first item from a list of dicts
-        def get_first(items, key="value"):
+        def get_first(items: list[dict], key: str = "value") -> str:
             if not items:
                 return ""
             primary = next((item for item in items if item.get("isPrimary")), None)

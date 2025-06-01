@@ -15,11 +15,15 @@ def run_serial_export(args: argparse.Namespace, writer: CsvWriter) -> None:
     fetch_count = 0
     failed_count = 0
     first_batch = True
-    next_key = None
+
+    total_people = api.get_total_people()
+    log.print_ok(f"Total people: {total_people}")
+
+    offset = 0
     while True:
         log.print_ok_blue(f"Fetching people from Follow Up Boss: {fetch_count}")
         try:
-            people_response = api.get_people(limit=batch_size, next_key=next_key)
+            people_response = api.get_people(limit=batch_size, offset=offset)
         except requests.exceptions.RequestException as e:
             log.print_fail(f"Error fetching people: {e}")
             log.print_fail(f"Sleeping for {failed_count * 1.1} seconds")
@@ -33,8 +37,8 @@ def run_serial_export(args: argparse.Namespace, writer: CsvWriter) -> None:
         fetch_count += len(people)
         writer.write_people(people, args.output_csv, append=not first_batch)
         first_batch = False
-        next_key = people_response.get("_metadata", {}).get("next")
-        if not next_key:
+        offset += batch_size
+        if fetch_count >= total_people:
             break
 
 
@@ -56,13 +60,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Clean the CSV file before writing.",
     )
+    parser.add_argument(
+        "--skip-duplicate-names",
+        action="store_true",
+        help="Skip duplicate names.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    writer = CsvWriter()
+    writer = CsvWriter(skip_duplicate_names=args.skip_duplicate_names)
 
     if args.clean_csv:
         log.print_ok_blue("Cleaning CSV file")
