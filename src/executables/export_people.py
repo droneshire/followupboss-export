@@ -44,6 +44,7 @@ def main():
 
     fetch_count = 0
     failed_count = 0
+    start_time = time.time()
     while True:
         log.print_ok_blue(f"Fetching people from Follow Up Boss: {fetch_count}")
         try:
@@ -52,7 +53,7 @@ def main():
             log.print_fail(f"Error fetching people: {e}")
             log.print_fail(f"Sleeping for {failed_count * 1.1} seconds")
             failed_count += 1
-            time.sleep(failed_count * 1.1)
+            time.sleep(1 + failed_count * 1.1)
             continue
         failed_count = 0
         people = people_response.get("people", [])
@@ -64,6 +65,9 @@ def main():
         next_key = people_response.get("_metadata", {}).get("next")
         if not next_key:
             break
+
+    end_time = time.time()
+    log.print_ok_blue(f"Exported {fetch_count} people in {end_time - start_time} seconds")
 
 
 if __name__ == "__main__":
