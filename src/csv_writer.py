@@ -22,6 +22,9 @@ class CsvWriter:
         "Testing Box",
     ]
 
+    def __init__(self):
+        self.names = set()
+
     def write_people(self, people, output_path, append=False):
         mode = "a" if append else "w"
         with open(output_path, mode, newline="", encoding="utf-8") as csvfile:
@@ -29,6 +32,13 @@ class CsvWriter:
             if not append:
                 writer.writeheader()
             for person in people:
+                name = person.get("name")
+                if not name:
+                    continue
+                # Skip if we've already seen this name
+                if name in self.names:
+                    continue
+                self.names.add(name)
                 row = self._person_to_row(person)
                 writer.writerow(row)
             csvfile.flush()
