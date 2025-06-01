@@ -43,14 +43,18 @@ def main():
         writer.erase_file(args.output_csv)
 
     fetch_count = 0
+    failed_count = 0
     while True:
         log.print_ok_blue(f"Fetching people from Follow Up Boss: {fetch_count}")
         try:
             people_response = api.get_people(limit=batch_size, next_key=next_key)
         except requests.exceptions.RequestException as e:
-            log.print_error(f"Error fetching people: {e}")
-            time.sleep(1)
-            break
+            log.print_fail(f"Error fetching people: {e}")
+            log.print_fail(f"Sleeping for {failed_count * 1.1} seconds")
+            failed_count += 1
+            time.sleep(failed_count * 1.1)
+            continue
+        failed_count = 0
         people = people_response.get("people", [])
         if not people:
             break
