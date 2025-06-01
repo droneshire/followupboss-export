@@ -1,3 +1,7 @@
+"""
+API Docs: https://docs.followupboss.com/reference/
+"""
+
 import base64
 
 import requests
