@@ -1,4 +1,5 @@
 import csv
+import os
 
 
 class CsvWriter:
@@ -30,6 +31,12 @@ class CsvWriter:
             for person in people:
                 row = self._person_to_row(person)
                 writer.writerow(row)
+            csvfile.flush()
+            os.fsync(csvfile.fileno())
+
+    def erase_file(self, output_path):
+        if os.path.exists(output_path):
+            os.remove(output_path)
 
     def _person_to_row(self, person):
         # Helper to get first primary or first item from a list of dicts

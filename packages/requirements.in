@@ -7,5 +7,6 @@ isort
 mypy
 pylint
 ruff
+ryutils
 
 types-requests
