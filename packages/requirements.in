@@ -1,0 +1,11 @@
+requests
+python-dotenv
+
+coverage
+black
+isort
+mypy
+pylint
+ruff
+
+types-requests
