@@ -10,6 +10,8 @@ from constants import API_KEY
 
 
 class FollowUpBossApi:
+    TIMEOUT = 5
+
     BASE_URL = "https://api.followupboss.com/v1/"
 
     def __init__(self):
@@ -38,7 +40,7 @@ class FollowUpBossApi:
             self.BASE_URL + "people",
             headers=self.headers,
             params=params,
-            timeout=10,
+            timeout=self.TIMEOUT,
         )
         response.raise_for_status()
         return response.json()
